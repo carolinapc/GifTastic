@@ -14,7 +14,24 @@
 </head>
 <body class="d-flex flex-column h-100">
     <header class="shadow p-3 mb-5 bg-white rounded">
-        <h1>Giftastic!</h1>
+        <div class="container p-0">
+            <nav class="navbar navbar-expand-md navbar-light bg-white p-0 m-0">
+                <a class="navbar-brand logo" href="index.html">GifTastic</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Stickers</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="portfolio.html">Favorites</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
     </header>
     
     <main class="shadow p-3 mb-5 bg-white rounded">
@@ -23,7 +40,9 @@
         <button id="button-add">Add</button>
 
         <section id="buttons"></section> 
-        <section id="stickers"></section>        
+        <section id="stickers"></section>   
+        
+        <button id="button-more">Show more 10...</button>
     </main>
     
     <footer class="footer mt-auto py-3">

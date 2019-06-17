@@ -67,7 +67,7 @@ figcaption{
 }
 
 img{
-    height: 60px;
+    height: 100px;
     cursor: pointer;
     padding: 10px;
     margin: 5px;
@@ -86,8 +86,12 @@ img{
 }
 
 footer{
-    padding-top: 20px;
+    padding-top: 10px;
     text-align: center;
+    background-color: #fff;
     width: 100%;
 }
 
+#button-more{
+    display: none;
+}
