@@ -3,8 +3,36 @@ $(document).ready(function(){
     var buttons = $("#buttons");
     var stickers = $("#stickers");
     var topics = ["scary","yelling","scream","laugh","happy","sarcastic","sad"];
+    var favorites = [];
     var topicsData = [];
     var currentTopic;
+    var favoritesOpened = false;
+
+    function searchSticker(topicData, offset=0){
+        var apiKey = "2Le1nOR1c6chdiUugysImelMGr88olDp";
+        var limit = 10;
+        var queryURL = "https://api.giphy.com/v1/stickers/search?api_key="+apiKey+"&q="+topicData.topic+"&limit="+limit+"&offset="+offset;
+        
+        $.ajax({
+            url: queryURL,
+            method: "GET"
+        }).then(response => {
+
+            if(offset ===0){
+                topicData.data = response.data;
+                showStickers(response.data);
+            }
+            else
+            {
+                response.data.forEach(item => {
+                    topicData.data.push(item);  
+                    createSticker(item);  
+                });
+                
+            }
+            
+        });
+    }
 
     //returns an item from topicsData array
     function getItemTopicsData(topic){
@@ -19,6 +47,7 @@ $(document).ready(function(){
         return item;
     }
 
+
     function addItemTopicsData(topic){
         //add new data object into topicsData array 
         var data = {
@@ -27,6 +56,38 @@ $(document).ready(function(){
         };
         topicsData.push(data);
         
+    }
+
+    //add or remove the item to/from favorites
+    function addOrRemoveFavorite(){
+        var idSticker = $(this).val();
+        var item = getItemTopicsData(currentTopic);
+        
+        console.log(idSticker);
+        if($(this).text() === "+" ){
+            //loop through the topic data searching for the id selected to add into favorites or remove it
+            for (var i = 0; i < item.data.length; i++) {
+                if(item.data[i].id === idSticker){
+                    favorites.push(item.data[i]);
+                    $(this).text("-");
+                    break;
+                }
+            }
+        }
+        else{
+            //loop through the topic data searching for the id selected to add into favorites or remove it
+            for (var i = 0; i < favorites.length; i++) {
+                if(favorites[i].id === idSticker){
+                    favorites.splice(i,1);
+                    if(favoritesOpened)
+                        $("#"+idSticker).css("display", "none");
+                    else
+                        $(this).text("+");
+                }
+            }
+        }
+
+        console.log(favorites);
     }
 
     //when the user clicks on the sticker: the image plays or stops dependending on the current status
@@ -64,6 +125,15 @@ $(document).ready(function(){
         var img = $("<img>");
         var figure = $("<figure>");
         var figCaption = $("<figcaption>").text("Rating: "+item.rating);
+        var button = $("<button>");
+
+        if(favorites.includes(item))
+            button.text("-");
+        else
+            button.text("+");
+
+        button.attr("value",item.id);
+        button.click(addOrRemoveFavorite);
 
         img.attr("src",item.images.original_still.url);
         img.attr("src-animated",item.images.fixed_width.url);
@@ -72,6 +142,9 @@ $(document).ready(function(){
         img.click(toggleSticker);
         img.addClass("sticker");
 
+        figure.attr("id", item.id);
+
+        figCaption.prepend(button);
         figure.append(img);
         figure.append(figCaption);
         stickers.append(figure);
@@ -94,31 +167,7 @@ $(document).ready(function(){
         
     }
 
-    function searchSticker(topicData, offset=0){
-        var apiKey = "2Le1nOR1c6chdiUugysImelMGr88olDp";
-        var limit = 10;
-        var queryURL = "https://api.giphy.com/v1/stickers/search?api_key="+apiKey+"&q="+topicData.topic+"&limit="+limit+"&offset="+offset;
-        
-        $.ajax({
-            url: queryURL,
-            method: "GET"
-        }).then(response => {
-
-            if(offset ===0){
-                topicData.data = response.data;
-                showStickers(response.data);
-            }
-            else
-            {
-                response.data.forEach(item => {
-                    topicData.data.push(item);  
-                    createSticker(item);  
-                });
-                
-            }
-            
-        });
-    }
+    
 
     function showButtons(){
         topics.sort();
@@ -152,11 +201,27 @@ $(document).ready(function(){
         showButtons();
     }
 
+    function openFavorites(){
+        $("#controls").css("display","none");
+        $("#buttons").css("display","none");
+        $("#button-more").css("display","none");
+        favoritesOpened = true;
+        showStickers(favorites);
+    }
+
+    function openStickers(){
+        $("#controls").css("display","block");
+        $("#buttons").css("display","block");
+        stickers.empty();
+    }
+
     initialize();
 
     
     $("#button-add").click(addButton);
     $("#button-more").click(showMoreStickers);
+    $("#link-stickers").click(openStickers);
+    $("#link-favorites").click(openFavorites);
 
     $("#word").keypress(event => {
         if(event.key == "Enter"){

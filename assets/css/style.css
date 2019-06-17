@@ -64,6 +64,14 @@ figure{
 
 figcaption{
     border-top: 1px solid #000;
+    text-align: left;
+}
+
+figcaption button{
+    border-radius: 50px;
+    padding: 0 10px;
+    margin: 2px 5px;
+    
 }
 
 img{
