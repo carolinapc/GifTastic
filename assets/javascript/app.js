@@ -8,10 +8,40 @@ $(document).ready(function(){
     var currentTopic;
     var favoritesOpened = false;
 
-    function searchSticker(topicData, offset=0){
+
+    //stores the favorites in the localStorage
+    function storeFavorites(){
+        //check if browser supports storage
+        if (typeof(Storage) !== "undefined") {
+            window.localStorage.setItem("favorites", JSON.stringify(favorites));
+        }
+
+    }
+
+    //retrieves the favorites stored in the localStorage
+    function setFavoritesStored(){
+        //check if browser supports storage
+        if (typeof(Storage) !== "undefined") {
+            if(localStorage.getItem("favorites") !== null){
+                favorites = JSON.parse(window.localStorage.getItem('favorites'));
+                if(favorites.length ===0) favorites = [];
+            }
+        }
+
+    }
+
+    //check if an object is included on the favorites (array of objects) - array.include() doesn't work to check this object, because facorites was stored and the array of objects only stores object references
+    function isFavorite(item){
+        for(var i=0; i< favorites.length; i++){
+            if(favorites[i].id === item.id) return true;
+        }
+        return false;
+    }
+
+    function searchSticker(topicObj, offset=0){
         var apiKey = "2Le1nOR1c6chdiUugysImelMGr88olDp";
         var limit = 10;
-        var queryURL = "https://api.giphy.com/v1/stickers/search?api_key="+apiKey+"&q="+topicData.topic+"&limit="+limit+"&offset="+offset;
+        var queryURL = "https://api.giphy.com/v1/stickers/search?api_key="+apiKey+"&q="+topicObj.topic+"&limit="+limit+"&offset="+offset;
         
         $.ajax({
             url: queryURL,
@@ -19,18 +49,16 @@ $(document).ready(function(){
         }).then(response => {
 
             if(offset ===0){
-                topicData.data = response.data;
+                topicObj.data = response.data;
                 showStickers(response.data);
             }
             else
             {
                 response.data.forEach(item => {
-                    topicData.data.push(item);  
+                    topicObj.data.push(item);  
                     createSticker(item);  
                 });
-                
             }
-            
         });
     }
 
@@ -63,31 +91,42 @@ $(document).ready(function(){
         var idSticker = $(this).val();
         var item = getItemTopicsData(currentTopic);
         
-        console.log(idSticker);
-        if($(this).text() === "+" ){
-            //loop through the topic data searching for the id selected to add into favorites or remove it
-            for (var i = 0; i < item.data.length; i++) {
-                if(item.data[i].id === idSticker){
-                    favorites.push(item.data[i]);
-                    $(this).text("-");
-                    break;
-                }
+        //if it is include it in the favorites, remove it, otherwise add it
+        if($(this).attr("data-favorite") === "yes" ){
+            $(this).attr("data-favorite","no");
+
+            if(favoritesOpened){
+                $("#"+idSticker).css("display", "none");
             }
-        }
-        else{
+            else{
+                $(this).html("<i class='far fa-star'></i>");
+            }
+
             //loop through the topic data searching for the id selected to add into favorites or remove it
             for (var i = 0; i < favorites.length; i++) {
                 if(favorites[i].id === idSticker){
                     favorites.splice(i,1);
-                    if(favoritesOpened)
-                        $("#"+idSticker).css("display", "none");
-                    else
-                        $(this).text("+");
+                    break;
                 }
             }
+
+        }
+        else{
+
+            $(this).attr("data-favorite","yes");
+            $(this).html("<i class='fas fa-star'></i>");
+
+            //loop through the topic data searching for the id selected to add into favorites or remove it
+            for (var i = 0; i < item.data.length; i++) {
+                if(item.data[i].id === idSticker){
+                    favorites.push(item.data[i]);
+                    break;
+                }
+            }
+
         }
 
-        console.log(favorites);
+        storeFavorites();
     }
 
     //when the user clicks on the sticker: the image plays or stops dependending on the current status
@@ -102,19 +141,27 @@ $(document).ready(function(){
         }
     }
 
-    //when the user clicks on a topic button: show the stickers related 
-    function selectTopic(){
-        currentTopic = $(this).attr("value");
-        var topicData = getItemTopicsData(currentTopic);
+    //when the user clicks on a topic button 
+    function topicClick(){
+
+        $(".btn-dark").attr("class","btn btn-outline-dark");
+        $(this).attr("class","btn btn-dark");
+        selectTopic($(this).attr("value"));
+    }
+
+    //show the stickers related to the topic: if there's data stored, retrieve from the array otherwise retrive it from the API
+    function selectTopic(topic){
+        currentTopic = topic;
+        var topicObj = getItemTopicsData(currentTopic);
         
-        if(topicData.data.length > 0){
+        if(topicObj.data.length > 0){
             //show the stickers from the data stored
-            showStickers(topicData.data);
+            showStickers(topicObj.data);
         }
         else
         {
             //search for the topic in the API and load the topic data
-            searchSticker(topicData);
+            searchSticker(topicObj);
         }
         
         $("#button-more").css("display","block");
@@ -127,11 +174,16 @@ $(document).ready(function(){
         var figCaption = $("<figcaption>").text("Rating: "+item.rating);
         var button = $("<button>");
 
-        if(favorites.includes(item))
-            button.text("-");
-        else
-            button.text("+");
+        if(isFavorite(item)){
+            button.html("<i class='fas fa-star'></i>");
+            button.attr("data-favorite", "yes");
+        }
+        else{
+            button.html("<i class='far fa-star'></i>");
+            button.attr("data-favorite", "no");
+        }
 
+        
         button.attr("value",item.id);
         button.click(addOrRemoveFavorite);
 
@@ -161,9 +213,9 @@ $(document).ready(function(){
 
     //add more stickers into the current topic (without overwrite the existing images)
     function showMoreStickers(){
-        var topic = getItemTopicsData(currentTopic);
+        var topicObj = getItemTopicsData(currentTopic);
 
-        searchSticker(topic,topic.data.length);
+        searchSticker(topicObj,topicObj.data.length);
         
     }
 
@@ -172,46 +224,76 @@ $(document).ready(function(){
     function showButtons(){
         topics.sort();
         buttons.empty();
+        
         topics.forEach(item => {
             var btn = $("<button>").text(item);
-            btn.addClass("topic");
+            
+            if(currentTopic === item)
+                btn.attr("class","btn btn-dark");
+            else
+                btn.attr("class","btn btn-outline-dark");
+
             btn.attr("value",item);
-            btn.click(selectTopic);
+            btn.click(topicClick);
             buttons.append(btn);  
         });
     }
 
     function addButton(){
-        var newTopic = $("#word").val();
-        if(!topics.includes(newTopic)){
-            topics.push(newTopic);
-            //add new data item to array of topic objetcs
-            addItemTopicsData(newTopic);
+        var newTopic = $("#word").val().trim();
+
+        if(newTopic != ""){
+
+            //if the topic doesn't exist
+            if(!topics.includes(newTopic)){
+                topics.push(newTopic);
+                //add new data item to array of topic objetcs
+                addItemTopicsData(newTopic);
+            }
+
+            currentTopic = newTopic;
+            //removes the css active button from the button that was active
+            $(".btn-dark").attr("class","btn btn-outline-dark");
+
             showButtons();
+
+            //show the topic items 
+            selectTopic(newTopic);
+            
+            $("#buttons").css("display","block");
+            $("#stickers-bar").css("display","flex");
         }
+        
     }
 
     function initialize(){
+
+        setFavoritesStored();
 
         topics.forEach(item => {
             //add new data item to array of topic objetcs
             addItemTopicsData(item);
         });
-
+        
         showButtons();
+
+
     }
 
     function openFavorites(){
-        $("#controls").css("display","none");
-        $("#buttons").css("display","none");
         $("#button-more").css("display","none");
+        $("#buttons").css("display","none");
         favoritesOpened = true;
         showStickers(favorites);
     }
 
     function openStickers(){
-        $("#controls").css("display","block");
         $("#buttons").css("display","block");
+        $("#button-more").css("display","none");
+        $("#stickers-bar").css("display","flex");
+        $(".btn-dark").attr("class","btn btn-outline-dark");
+        
+        favoritesOpened = false;
         stickers.empty();
     }
 
@@ -222,6 +304,7 @@ $(document).ready(function(){
     $("#button-more").click(showMoreStickers);
     $("#link-stickers").click(openStickers);
     $("#link-favorites").click(openFavorites);
+    $("#link-search-stickers").click(openStickers);
 
     $("#word").keypress(event => {
         if(event.key == "Enter"){

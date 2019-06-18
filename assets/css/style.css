@@ -15,13 +15,11 @@ html,body{
 }
 
 body{
-    /* background-image: url('../images/background.png'); */
-    background-color: #c1c1c1;
+    background-color: #fff;
 }
 
 header, main, footer {
-    margin: 20px auto;
-    
+    margin: 0px auto;
 }
 
 header, footer{
@@ -29,6 +27,12 @@ header, footer{
     margin: 0 auto;
     width: 100%;
     text-align: center;
+}
+
+#stickers-bar{
+    padding: 5px;
+    border-bottom: 1px solid #c1c1c1;
+    background-color: #fff;
 }
 
 h1{
@@ -47,6 +51,11 @@ main {
 section{
     margin: 10px auto 10px auto;
     text-align: center;
+    
+}
+#buttons{
+    background-image: url('../images/background.png');
+    margin: 0 auto;
 }
 
 #stickers{
@@ -57,21 +66,22 @@ section{
 
 figure{
     margin: 5px 10px;
-    border: 1px solid #000;
+    border: 0px solid #c1c1c1;
     padding: 10px;
     border-radius: 10px;
 }
 
 figcaption{
-    border-top: 1px solid #000;
+    padding-top: 5px;
+    border-top: 1px solid #c1c1c1;
     text-align: left;
 }
 
 figcaption button{
-    border-radius: 50px;
-    padding: 0 10px;
+    border: 0;
     margin: 2px 5px;
-    
+    color: #027aff;
+    background-color: transparent;
 }
 
 img{
@@ -81,25 +91,16 @@ img{
     margin: 5px;
 }
 
-.topic{
-    margin: 10px 5px;
-    border-radius:5px;
-    background-color: whitesmoke;
-
-}
-.topic:hover{
-    background-color: #0d5f25;
-    color: #fff;
-
-}
 
 footer{
-    padding-top: 10px;
+    padding: 0;
     text-align: center;
-    background-color: #fff;
+    background-color: #000;
+    color: #fff;
     width: 100%;
 }
 
 #button-more{
     display: none;
+    margin: 10px auto;
 }
