@@ -148,6 +148,16 @@ th{
     padding: 5px 10px;
     font-size: 18px;
 }
+th img{
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    cursor: default;
+}
+th:last-child{
+    text-align: center;
+}
 
 td{
     text-align: left;

@@ -434,17 +434,19 @@ function showArtist(artist){
 }
 
 function showArtistEvents(event){
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec"]
     var table = $("<table>");
-    table.append("<thead><tr><th>Date</th><th>Venue</th><th>Location</th><th>Tickets</th></tr></thead>");
+    table.append("<thead><tr><th>Date</th><th>Venue</th><th>Location</th><th><img src='https://assets.bandsintown.com/images/bitFist.svg' title='bands in town' alt='bands in town'></th></tr></thead>");
     var bodyTable = $("<tbody>");
 
     event.forEach(item => {
+        var date = new Date(item.datetime);
         var newRow = $("<tr>");
         var newLink = $("<a>").text("Tickets");
         newLink.attr("href",item.url);
         newLink.attr("target", "_blank");
 
-        newRow.append($("<td>").text(item.datetime));
+        newRow.append($("<td>").text(months[date.getMonth()] + " " + date.getDate() + " " + date.getFullYear()));
         newRow.append($("<td>").text(item.venue.name));
         newRow.append($("<td>").text(item.venue.city + " - "+item.venue.country));
         newRow.append($("<td>").append(newLink));
