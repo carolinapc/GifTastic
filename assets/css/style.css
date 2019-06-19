@@ -15,7 +15,7 @@ html,body{
 }
 
 body{
-    background-color: #fff;
+    background-image: url('../images/background.png');
 }
 
 header, main, footer {
@@ -41,8 +41,10 @@ header, footer{
 }
 
 #events{
+    background-color: transparent;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     padding: 20px 10px;
 }
 .artist{
@@ -80,7 +82,8 @@ section{
     
 }
 #buttons{
-    background-image: url('../images/background.png');
+    background-color: #fff;
+    padding: 5px;
     margin: 0 auto;
 }
 
@@ -92,9 +95,10 @@ section{
 
 figure{
     margin: 5px 10px;
-    border: 0px solid #c1c1c1;
+    border: 1px solid #c1c1c1;
     padding: 10px;
     border-radius: 10px;
+    background-color: #fff;
 }
 
 figcaption{
@@ -133,19 +137,33 @@ footer{
 
 table{
     font-size: 16px;
+    margin: 5px;
+    background-color: #fff;
+    
+    border-radius: 10px;
 }
-tr:hover{
+tbody tr:hover{
     background-color: #c1c1c1;
+
 }
 th{
     text-align: left;
-    border-bottom: 1px solid #c1c1c1;
     font-weight: bold;
     padding: 5px 10px;
+    font-size: 18px;
 }
 
 td{
     text-align: left;
-    border-bottom: 1px solid #c1c1c1;
+    border-top: 1px solid #c1c1c1;
     padding: 5px 10px;
+    
+}
+tbody tr:last-child td:last-child{
+    border-bottom-right-radius: 10px;
+
+}
+tbody tr:last-child td:first-child{
+    border-bottom-left-radius: 10px;
+
 }

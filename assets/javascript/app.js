@@ -329,7 +329,8 @@ function showArtist(artist){
 
 function showArtistEvents(event){
     var table = $("<table>");
-    table.append("<tr><th>Date</th><th>Venue</th><th>Location</th><th>Tickets</th></tr>");
+    table.append("<thead><tr><th>Date</th><th>Venue</th><th>Location</th><th>Tickets</th></tr></thead>");
+    var bodyTable = $("<tbody>");
 
     event.forEach(item => {
         var newRow = $("<tr>");
@@ -341,9 +342,10 @@ function showArtistEvents(event){
         newRow.append($("<td>").text(item.venue.name));
         newRow.append($("<td>").text(item.venue.city + " - "+item.venue.country));
         newRow.append($("<td>").append(newLink));
-        table.append(newRow);
+        bodyTable.append(newRow);
     });
     
+    table.append(bodyTable);
     events.append(table);
 }
 
@@ -474,25 +476,7 @@ function addArtist(){
     
 }
 
-function initialize(){
 
-    favorites = getDataStored("favorites");
-    following = getDataStored("following");
-    following.forEach(item => {
-        artists.push(item);
-    });
-    
-    console.log(artists);
-
-    topics.forEach(item => {
-        //add new data item to array of topic objetcs
-        addItemTopicsData(item);
-    });
-    
-    showButtons(topics, topicClick);
-
-
-}
 
 function openFavorites(){
     $("#button-more").css("display","none");
@@ -513,6 +497,7 @@ function openFollowing(){
 }
 
 function openStickers(){
+    currentSubject = "";
     $("#buttons").css("display","block");
     $("#button-more").css("display","none");
     $("#stickers-bar").css("display","flex");
@@ -527,6 +512,7 @@ function openStickers(){
 }
 
 function openEvents(){
+    currentSubject = "";
     followingOpened = false;
     events.empty();
     $("#stickers-bar").css("display","none");
@@ -539,6 +525,24 @@ function openEvents(){
     showButtons(artists, artistClick);
 }
 
+function initialize(){
+
+    favorites = getDataStored("favorites");
+    following = getDataStored("following");
+    following.forEach(item => {
+        artists.push(item);
+    });
+    
+    console.log(artists);
+
+    topics.forEach(item => {
+        //add new data item to array of topic objetcs
+        addItemTopicsData(item);
+    });
+    
+    showButtons(topics, topicClick);
+
+}
 
 $(document).ready(function(){
     
