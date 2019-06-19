@@ -18,12 +18,8 @@ body{
     background-image: url('../images/background.png');
 }
 
-header, main, footer {
-    margin: 0px auto;
-}
 
 header, footer{
-    /* background-image: url('../images/bgheader.png'); */
     margin: 0 auto;
     width: 100%;
     text-align: center;
@@ -70,8 +66,8 @@ h1{
     text-shadow: #c1c1c1 2px 1px 0;
 }
 
-
 main {
+    margin: 0px auto; 
     width: 100%;
     font-size: 22px;
 }

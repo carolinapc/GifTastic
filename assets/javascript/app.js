@@ -1,7 +1,7 @@
-/** GENERAL VARIABLES DECLARATIONS */
+/** GENERAL VARIABLES DECLARATIONS ***********************************************/
 var buttons;
 
-/** STICKERS VARIABLES DECLARATIONS */
+/** STICKERS VARIABLES DECLARATIONS **********************************************/
 
 var stickers;
 var topics = ["scary","yelling","scream","laugh","happy","sarcastic","sad"];
@@ -10,13 +10,15 @@ var topicsData = [];
 var currentSubject;
 var favoritesOpened = false;
 
-/** EVENTS VARIABLES DECLARATIONS */
+/** EVENTS VARIABLES DECLARATIONS ************************************************/
 var events;
 var artists = [];
 var following = [];
 var followingOpened = false;
 
 
+
+/** GENERAL FUNCTIONS ************************************************************/
 
 //stores the favorites or following in the localStorage
 function storeData(storage, data){
@@ -26,7 +28,6 @@ function storeData(storage, data){
     }
 
 }
-
 
 //retrieves the favorites/following stored in the localStorage
 function getDataStored(storage){
@@ -43,6 +44,28 @@ function getDataStored(storage){
 
 }
 
+//show buttons of the subject (topics or artists)
+function showButtons(subject, clickFunction){
+    subject.sort();
+    buttons.empty();
+    
+    subject.forEach(item => {
+        var btn = $("<button>").text(item);
+        
+        if(currentSubject === item)
+            btn.attr("class","btn btn-dark");
+        else
+            btn.attr("class","btn btn-outline-dark");
+
+        btn.attr("value",item);
+        btn.click(clickFunction);
+        buttons.append(btn);  
+    });
+}
+
+
+/** STICKERS FUNCTIONS ************************************************************/
+
 //check if an object is included on the favorites (array of objects) - array.include() doesn't work to check this object, because facorites was stored and the array of objects only stores object references
 function isFavorite(item){
     for(var i=0; i< favorites.length; i++){
@@ -51,8 +74,8 @@ function isFavorite(item){
     return false;
 }
 
- //add or remove the item to/from favorites
- function addOrRemoveFavorite(){
+//add or remove the item to/from favorites
+function addOrRemoveFavorite(){
     var idSticker = $(this).val();
     var item = getItemTopicsData(currentSubject);
     
@@ -94,6 +117,185 @@ function isFavorite(item){
     storeData("favorites",favorites);
 }
 
+function searchSticker(topicObj, offset=0){
+    var apiKey = "2Le1nOR1c6chdiUugysImelMGr88olDp";
+    var limit = 10;
+    var queryURL = "https://api.giphy.com/v1/stickers/search?api_key="+apiKey+"&q="+topicObj.topic+"&limit="+limit+"&offset="+offset;
+    
+    $.ajax({
+        url: queryURL,
+        method: "GET",
+        success: response => {
+
+            if(offset ===0){
+                topicObj.data = response.data;
+                showStickers(response.data);
+            }
+            else
+            {
+                
+                response.data.forEach(item => {
+                    topicObj.data.push(item);  
+                    createSticker(item);  
+                });
+            }
+        },
+        error: function () {
+            console.log("error");
+            stickers.empty();
+            $("#button-more").css("display","none");
+        }
+    });
+   
+}
+
+//returns an item from topicsData array
+function getItemTopicsData(topic){
+
+    var item;
+    for(var i=0; i < topicsData.length; i++){
+        if(topicsData[i].topic === topic){
+            item = topicsData[i];
+            break;
+        }
+    }
+    return item;
+}
+
+
+function addItemTopicsData(topic){
+    //add new data object into topicsData array 
+    var data = {
+        topic: topic,
+        data: []                
+    };
+    topicsData.push(data);
+    
+}
+
+
+function addTopic(){
+    var newTopic = $("#topic").val().trim();
+
+    if(newTopic != ""){
+
+        //if the topic doesn't exist
+        if(!topics.includes(newTopic)){
+            topics.push(newTopic);
+            //add new data item to array of topic objetcs
+            addItemTopicsData(newTopic);
+        }
+
+        currentSubject = newTopic;
+        //removes the css active button from the button that was active
+        $(".btn-dark").attr("class","btn btn-outline-dark");
+
+        showButtons(topics, topicClick);
+
+        //show the topic items 
+        selectTopic(newTopic);
+        
+        $("#buttons").css("display","block");
+        $("#stickers-bar").css("display","flex");
+    }
+    
+}
+
+
+//when the user clicks on the sticker: the image plays or stops dependending on the current status
+function toggleSticker(){
+    var sticker = $(this);
+
+    if(sticker.attr("src-animated") === sticker.attr("src")){
+        sticker.attr("src",sticker.attr("src-original"));
+    }
+    else{
+        sticker.attr("src",sticker.attr("src-animated"));
+    }
+}
+
+//when the user clicks on a topic button 
+function topicClick(){
+
+    $(".btn-dark").attr("class","btn btn-outline-dark");
+    $(this).attr("class","btn btn-dark");
+    selectTopic($(this).attr("value"));
+}
+
+//show the stickers related to the topic: if there's data stored, retrieve from the array otherwise retrive it from the API
+function selectTopic(topic){
+    currentSubject = topic;
+    var topicObj = getItemTopicsData(currentSubject);
+    
+    if(topicObj.data.length > 0){
+        //show the stickers from the data stored
+        showStickers(topicObj.data);
+    }
+    else
+    {
+        //search for the topic in the API and load the topic data
+        searchSticker(topicObj);
+    }
+    
+    $("#button-more").css("display","block");
+}
+
+//creates the elements to place the image and append it into the sticker section
+function createSticker(item){
+    var img = $("<img>");
+    var figure = $("<figure>");
+    var figCaption = $("<figcaption>").text("Rating: "+item.rating);
+    var button = $("<button>");
+
+    if(isFavorite(item)){
+        button.html("<i class='fas fa-star'></i>");
+        button.attr("data-favorite", "yes");
+    }
+    else{
+        button.html("<i class='far fa-star'></i>");
+        button.attr("data-favorite", "no");
+    }
+
+    
+    button.attr("value",item.id);
+    button.click(addOrRemoveFavorite);
+
+    img.attr("src",item.images.original_still.url);
+    img.attr("src-animated",item.images.fixed_width.url);
+    img.attr("src-original",item.images.original_still.url);
+    img.attr("title",item.title);
+    img.click(toggleSticker);
+    img.addClass("sticker");
+
+    figure.attr("id", item.id);
+
+    figCaption.prepend(button);
+    figure.append(img);
+    figure.append(figCaption);
+    stickers.append(figure);
+}
+
+
+
+//show stickers from the data (could be from the array (topicsData) or the API)
+function showStickers(data){
+    stickers.empty();
+
+    data.forEach(item =>{
+        createSticker(item);
+    });
+}
+
+//add more stickers into the current topic (without overwrite the existing images)
+function showMoreStickers(){
+    var topicObj = getItemTopicsData(currentSubject);
+
+    searchSticker(topicObj,topicObj.data.length);
+    
+}
+
+/** EVENTS FUNCTIONS ************************************************************/
+
 function followOrUnfollow(){
     var artistId = $(this).attr("data-id");
     var artistName = $(this).val();
@@ -129,37 +331,6 @@ function followOrUnfollow(){
     storeData("following",following);
 }
 
-function searchSticker(topicObj, offset=0){
-    var apiKey = "2Le1nOR1c6chdiUugysImelMGr88olDp";
-    var limit = 10;
-    var queryURL = "https://api.giphy.com/v1/stickers/search?api_key="+apiKey+"&q="+topicObj.topic+"&limit="+limit+"&offset="+offset;
-    
-    $.ajax({
-        url: queryURL,
-        method: "GET",
-        success: response => {
-
-            if(offset ===0){
-                topicObj.data = response.data;
-                showStickers(response.data);
-            }
-            else
-            {
-                
-                response.data.forEach(item => {
-                    topicObj.data.push(item);  
-                    createSticker(item);  
-                });
-            }
-        },
-        error: function () {
-            console.log("error");
-            stickers.empty();
-            $("#button-more").css("display","none");
-        }
-    });
-   
-}
 
 function searchArtist(artist){
     currentSubject = artist;
@@ -202,51 +373,6 @@ function searchArtistEvents(artist){
 
 }
 
-//returns an item from topicsData array
-function getItemTopicsData(topic){
-
-    var item;
-    for(var i=0; i < topicsData.length; i++){
-        if(topicsData[i].topic === topic){
-            item = topicsData[i];
-            break;
-        }
-    }
-    return item;
-}
-
-
-function addItemTopicsData(topic){
-    //add new data object into topicsData array 
-    var data = {
-        topic: topic,
-        data: []                
-    };
-    topicsData.push(data);
-    
-}
-
-
-
-//when the user clicks on the sticker: the image plays or stops dependending on the current status
-function toggleSticker(){
-    var sticker = $(this);
-
-    if(sticker.attr("src-animated") === sticker.attr("src")){
-        sticker.attr("src",sticker.attr("src-original"));
-    }
-    else{
-        sticker.attr("src",sticker.attr("src-animated"));
-    }
-}
-
-//when the user clicks on a topic button 
-function topicClick(){
-
-    $(".btn-dark").attr("class","btn btn-outline-dark");
-    $(this).attr("class","btn btn-dark");
-    selectTopic($(this).attr("value"));
-}
 
 //when the user clicks on a artist button 
 function artistClick(){
@@ -262,23 +388,6 @@ function followingArtistClick(){
     currentSubject = "";
 }
 
-//show the stickers related to the topic: if there's data stored, retrieve from the array otherwise retrive it from the API
-function selectTopic(topic){
-    currentSubject = topic;
-    var topicObj = getItemTopicsData(currentSubject);
-    
-    if(topicObj.data.length > 0){
-        //show the stickers from the data stored
-        showStickers(topicObj.data);
-    }
-    else
-    {
-        //search for the topic in the API and load the topic data
-        searchSticker(topicObj);
-    }
-    
-    $("#button-more").css("display","block");
-}
 
 
 function showArtist(artist){
@@ -349,106 +458,6 @@ function showArtistEvents(event){
     events.append(table);
 }
 
-//creates the elements to place the image and append it into the sticker section
-function createSticker(item){
-    var img = $("<img>");
-    var figure = $("<figure>");
-    var figCaption = $("<figcaption>").text("Rating: "+item.rating);
-    var button = $("<button>");
-
-    if(isFavorite(item)){
-        button.html("<i class='fas fa-star'></i>");
-        button.attr("data-favorite", "yes");
-    }
-    else{
-        button.html("<i class='far fa-star'></i>");
-        button.attr("data-favorite", "no");
-    }
-
-    
-    button.attr("value",item.id);
-    button.click(addOrRemoveFavorite);
-
-    img.attr("src",item.images.original_still.url);
-    img.attr("src-animated",item.images.fixed_width.url);
-    img.attr("src-original",item.images.original_still.url);
-    img.attr("title",item.title);
-    img.click(toggleSticker);
-    img.addClass("sticker");
-
-    figure.attr("id", item.id);
-
-    figCaption.prepend(button);
-    figure.append(img);
-    figure.append(figCaption);
-    stickers.append(figure);
-}
-
-
-
-//show stickers from the data (could be from the array (topicsData) or the API)
-function showStickers(data){
-    stickers.empty();
-
-    data.forEach(item =>{
-        createSticker(item);
-    });
-}
-
-//add more stickers into the current topic (without overwrite the existing images)
-function showMoreStickers(){
-    var topicObj = getItemTopicsData(currentSubject);
-
-    searchSticker(topicObj,topicObj.data.length);
-    
-}
-
-
-//show buttons of the subject (topics or artists)
-function showButtons(subject, clickFunction){
-    subject.sort();
-    buttons.empty();
-    
-    subject.forEach(item => {
-        var btn = $("<button>").text(item);
-        
-        if(currentSubject === item)
-            btn.attr("class","btn btn-dark");
-        else
-            btn.attr("class","btn btn-outline-dark");
-
-        btn.attr("value",item);
-        btn.click(clickFunction);
-        buttons.append(btn);  
-    });
-}
-
-function addTopic(){
-    var newTopic = $("#topic").val().trim();
-
-    if(newTopic != ""){
-
-        //if the topic doesn't exist
-        if(!topics.includes(newTopic)){
-            topics.push(newTopic);
-            //add new data item to array of topic objetcs
-            addItemTopicsData(newTopic);
-        }
-
-        currentSubject = newTopic;
-        //removes the css active button from the button that was active
-        $(".btn-dark").attr("class","btn btn-outline-dark");
-
-        showButtons(topics, topicClick);
-
-        //show the topic items 
-        selectTopic(newTopic);
-        
-        $("#buttons").css("display","block");
-        $("#stickers-bar").css("display","flex");
-    }
-    
-}
 
 function addArtist(){
     followingOpened = false;
@@ -476,7 +485,7 @@ function addArtist(){
     
 }
 
-
+/** MAIN FUNCTIONS **********************************************************/
 
 function openFavorites(){
     $("#button-more").css("display","none");
