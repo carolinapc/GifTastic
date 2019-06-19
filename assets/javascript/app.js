@@ -141,8 +141,8 @@ function searchSticker(topicObj, offset=0){
             }
         },
         error: function () {
-            console.log("error");
             stickers.empty();
+            stickers.text("Sorry! No information was found.");
             $("#button-more").css("display","none");
         }
     });
@@ -198,6 +198,7 @@ function addTopic(){
         $("#buttons").css("display","block");
         $("#stickers-bar").css("display","flex");
     }
+    $("#topic").val("");
     
 }
 
@@ -346,9 +347,8 @@ function searchArtist(artist){
             showArtist(response);  
         },
         error: function () {
-            console.log("error");
-            // stickers.empty();
-            // $("#button-more").css("display","none");
+            events.empty();
+            events.text("Sorry! No information was found.");
         }
     });
 }
@@ -365,14 +365,11 @@ function searchArtistEvents(artist){
             showArtistEvents(response);  
         },
         error: function () {
-            console.log("error");
-            // stickers.empty();
-            // $("#button-more").css("display","none");
+            events.text("Sorry! No event was found.");
         }
     });
 
 }
-
 
 //when the user clicks on a artist button 
 function artistClick(){
@@ -381,6 +378,7 @@ function artistClick(){
     $(this).attr("class","btn btn-dark");
     searchArtist($(this).attr("value"));
 }
+
 //when the user clicks on a artist image from the following page
 function followingArtistClick(){
     followingOpened = false;
@@ -388,8 +386,7 @@ function followingArtistClick(){
     currentSubject = "";
 }
 
-
-
+//show information about the artist, creating the tags to build it
 function showArtist(artist){
     if(!followingOpened) events.empty();
 
@@ -482,6 +479,7 @@ function addArtist(){
         $("#buttons").css("display","block");
         $("#events-bar").css("display","flex");
     }
+    $("#artist").val("");
     
 }
 
@@ -542,8 +540,6 @@ function initialize(){
         artists.push(item);
     });
     
-    console.log(artists);
-
     topics.forEach(item => {
         //add new data item to array of topic objetcs
         addItemTopicsData(item);
