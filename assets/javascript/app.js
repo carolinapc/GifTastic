@@ -436,7 +436,7 @@ function showArtist(artist){
 function showArtistEvents(event){
     var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec"]
     var table = $("<table>");
-    table.append("<thead><tr><th>Date</th><th>Venue</th><th>Location</th><th><img src='https://assets.bandsintown.com/images/bitFist.svg' title='bands in town' alt='bands in town'></th></tr></thead>");
+    table.append("<thead><tr><th>Date</th><th>Venue</th><th>Location</th><th><img src='https://assets.bandsintown.com/images/bitFist.svg' title='bandsintown' alt='bandsintown'></th></tr></thead>");
     var bodyTable = $("<tbody>");
 
     event.forEach(item => {
