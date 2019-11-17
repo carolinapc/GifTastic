@@ -14,7 +14,7 @@ On this website it is possible to store the favorites stickers and follow the pr
 - jQuery
 - Ajax
 
-##### API's used
+### API's used
 
 - Giphy
 - Bandsintown
